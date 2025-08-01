@@ -28,7 +28,7 @@ export default function BusinessesPage() {
         const fetchBusinesses = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:4000/proxy/businesses', {
+                const res = await fetch('http://91.99.164.161:4000/proxy/businesses', {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${token}`,

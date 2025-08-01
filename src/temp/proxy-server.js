@@ -27,4 +27,4 @@ app.post('/proxy/businesses', async (req, res) => {
     }
 });
 
-app.listen(4000, () => console.log('Proxy listening on http://localhost:4000'));
+app.listen(4000, () => console.log('Proxy listening on http://91.99.164.161:4000'));

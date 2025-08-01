@@ -52,7 +52,7 @@ export default function AppointmentModal({doctor, onClose}: Props) {
     const sendSms = async () => {
         setError(null);
         try {
-            const res = await fetch('http://localhost:4000/proxy/send-sms', {
+            const res = await fetch('http://91.99.164.161:4000/proxy/send-sms', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({parameters: {phone_number: phone}, offset: 0, limit: 10, orderBy: 'ASC'}),
@@ -74,7 +74,7 @@ export default function AppointmentModal({doctor, onClose}: Props) {
                 .toString()
                 .padStart(2, '0')}.${now.getFullYear()}T${selectedTime}`;
 
-            const res = await fetch('http://localhost:4000/proxy/save-schedule', {
+            const res = await fetch('http://91.99.164.161:4000/proxy/save-schedule', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
