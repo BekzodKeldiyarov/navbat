@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {useParams} from 'next/navigation';
 import AppointmentModal from "@/app/business/[business_id]/staff/components/AppointmentModal";
-
 
 interface WeeklyDay {
     day: string;
@@ -22,11 +21,11 @@ interface Staff {
 }
 
 export default function ClinicStaffPage() {
-    const { business_id } = useParams();
+    const {business_id} = useParams();
     const [staff, setStaff] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedDoctor, setSelectedDoctor] = useState<Staff | null>(null); // 👈 добавлено
+    const [selectedDoctor, setSelectedDoctor] = useState<Staff | null>(null);
 
     useEffect(() => {
         const fetchStaff = async () => {
@@ -40,7 +39,7 @@ export default function ClinicStaffPage() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        parameters: { business_id: parseInt(business_id as string, 10) },
+                        parameters: {business_id: parseInt(business_id as string, 10)},
                         offset: 0,
                         limit: 10,
                         orderBy: 'ASC',
@@ -69,44 +68,65 @@ export default function ClinicStaffPage() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-6">Персонал клиники #{business_id}</h1>
+        <div className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 py-10 px-4 sm:px-8">
+            <div className="max-w-6xl mx-auto px-4 py-10">
+                <h1 className="text-3xl font-bold text-blue-900 mb-8 text-center">
+                    Персонал клиники #{business_id}
+                </h1>
 
-            {loading && <p>Загрузка...</p>}
-            {error && <p className="text-red-500">Ошибка: {error}</p>}
+                {loading && <p className="text-center text-gray-500">Загрузка...</p>}
+                {error && <p className="text-center text-red-500">Ошибка: {error}</p>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {staff.map((doctor) => (
-                    <div key={doctor.staff_id} className="border p-4 rounded shadow bg-white">
-                        <img src={doctor.urlimg} alt={doctor.first_name} className="w-24 h-24 rounded-full object-cover border mb-3" />
-                        <h2 className="font-semibold text-lg">
-                            {doctor.last_name} {doctor.first_name} {doctor.patronymic}
-                        </h2>
-                        <p className="text-sm text-gray-600 mb-2">⏱ Приём: {doctor.visit_time} мин</p>
-                        <ul className="text-sm text-gray-700 mb-2">
-                            {doctor.weekly_schedule.map((day) => (
-                                <li key={day.day}>
-                                    {formatDay(day.day)}: {day.start} – {day.end}
-                                </li>
-                            ))}
-                        </ul>
-
-                        <button
-                            onClick={() => setSelectedDoctor(doctor)}
-                            className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {staff.map((doctor) => (
+                        <div
+                            key={doctor.staff_id}
+                            className="bg-white border border-blue-100 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-5 flex gap-5"
                         >
-                            Записаться
-                        </button>
-                    </div>
-                ))}
-            </div>
+                            <img
+                                src={doctor.urlimg}
+                                alt={`${doctor.first_name} ${doctor.last_name}`}
+                                className="w-24 h-24 rounded-full object-cover border-2 border-blue-200"
+                            />
 
-            {selectedDoctor && (
-                <AppointmentModal
-                    doctor={selectedDoctor}
-                    onClose={() => setSelectedDoctor(null)}
-                />
-            )}
+                            <div className="flex-1">
+                                <h2 className="text-xl font-semibold text-blue-800 mb-1">
+                                    {doctor.last_name} {doctor.first_name} {doctor.patronymic}
+                                </h2>
+
+                                <p className="text-sm text-gray-600 mb-2">
+                                    ⏱ Время приёма: {doctor.visit_time} мин
+                                </p>
+
+                                <div className="text-sm text-gray-700 mb-2">
+                                    <p className="font-medium text-gray-800">Расписание:</p>
+                                    <ul className="list-disc pl-4">
+                                        {doctor.weekly_schedule.map((day) => (
+                                            <li key={day.day}>
+                                                {formatDay(day.day)}: {day.start} – {day.end}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedDoctor(doctor)}
+                                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+                                >
+                                    Записаться
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {selectedDoctor && (
+                    <AppointmentModal
+                        doctor={selectedDoctor}
+                        onClose={() => setSelectedDoctor(null)}
+                    />
+                )}
+            </div>
         </div>
     );
 }

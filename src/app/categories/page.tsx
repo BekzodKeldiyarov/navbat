@@ -45,24 +45,30 @@ export default function CategoriesPage() {
     }, []);
 
     return (
-        <div className="max-w-3xl mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-6">Категории услуг</h1>
+        <div className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 py-10 px-4 sm:px-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-blue-700 text-center mb-10">
+                Категории услуг
+            </h1>
 
-            {loading && <p>Загрузка...</p>}
-            {error && <p className="text-red-500">Ошибка: {error}</p>}
+            {loading && (
+                <p className="text-center text-blue-600 font-medium">Загрузка...</p>
+            )}
+            {error && (
+                <p className="text-center text-red-500 font-medium">Ошибка: {error}</p>
+            )}
 
-            <ul className="space-y-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-5xl mx-auto">
                 {data.map((cat) => (
-                    <li
+                    <div
                         key={cat.sp_сategorie_id}
-                        className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white"
+                        className="bg-gradient-to-r from-blue-600 to-sky-400 text-white p-6 rounded-2xl shadow-md hover:scale-[1.02] transition"
                     >
-                        <p className="text-lg font-medium">{cat.name}</p>
-                        <p className="text-sm text-gray-500">ID: {cat.sp_сategorie_id}</p>
-                        <p className="text-sm text-gray-500">Parent id: {cat.parent_id}</p>
-                    </li>
+                        <h2 className="text-xl font-semibold mb-1">{cat.name}</h2>
+                        {/*<p className="text-sm opacity-80">ID: {cat.sp_сategorie_id}</p>*/}
+                        {/*<p className="text-sm opacity-80">Родитель: {cat.parent_id}</p>*/}
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 }
