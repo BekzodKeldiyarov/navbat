@@ -1,36 +1,212 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Navbat - Система записи на прием к врачу
 
-## Getting Started
+## Описание проекта
 
-First, run the development server:
+Navbat - это веб-приложение для записи на прием к врачу, построенное на Next.js 14 с использованием TypeScript и Tailwind CSS. Приложение предоставляет функциональность поиска медицинских услуг, авторизации через SMS и управления записями на прием.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Архитектура проекта
+
+### Структура директорий
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── business/          # Страницы бизнеса/клиник
+│   ├── categories/        # Страница категорий
+│   ├── login/            # Страница авторизации
+│   ├── reservation/       # Страница создания записи
+│   ├── reservations/      # Страница списка записей
+│   ├── globals.css       # Глобальные стили
+│   ├── layout.tsx        # Корневой layout
+│   └── page.tsx          # Главная страница
+├── components/            # React компоненты
+│   ├── business/         # Компоненты для бизнеса
+│   ├── reservation/      # Компоненты для записей
+│   └── ui/              # Переиспользуемые UI компоненты
+├── config/               # Конфигурация приложения
+│   └── api.ts           # Настройки API
+├── contexts/             # React Context
+│   └── AuthContext.tsx  # Контекст аутентификации
+├── hooks/                # Кастомные React хуки
+│   ├── useAuth.ts       # Хук для аутентификации
+│   ├── useBusinesses.ts # Хук для работы с бизнесом
+│   ├── useCategories.ts # Хук для работы с категориями
+│   └── useReservationSteps.ts # Хук для шагов записи
+├── lib/                  # Библиотеки и утилиты
+│   ├── apiClient.ts     # API клиент
+│   ├── authService.ts   # Сервис аутентификации
+│   ├── storage.ts       # Сервис для работы с localStorage
+│   ├── validation.ts    # Схемы валидации
+│   ├── constants.ts     # Константы приложения
+│   └── utils.ts         # Утилиты
+├── types/                # TypeScript типы
+│   └── index.ts         # Основные типы
+└── middleware.ts         # Next.js middleware
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Основные принципы архитектуры
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Разделение ответственности
+- **UI компоненты** - только отображение и пользовательский ввод
+- **Бизнес-логика** - вынесена в сервисы и хуки
+- **Управление состоянием** - централизовано через Context API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Переиспользуемость
+- Компоненты `FormField`, `Alert`, `Button` и другие UI компоненты
+- Хуки для общей логики
+- Сервисы для бизнес-операций
 
-## Learn More
+### 3. Типизация
+- Полная типизация TypeScript
+- Интерфейсы для всех API ответов
+- Строгая типизация пропсов компонентов
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Обработка ошибок
+- Error Boundary для перехвата ошибок React
+- Централизованная обработка API ошибок
+- Пользовательские сообщения об ошибках
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Ключевые компоненты
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### AuthContext
+Централизованное управление состоянием аутентификации:
+- Отправка SMS кодов
+- Вход через SMS
+- Управление токенами доступа
+- Автоматическое перенаправление
 
-## Deploy on Vercel
+### StorageService
+Безопасная работа с localStorage:
+- Обработка ошибок парсинга
+- Типизированные методы
+- Проверка доступности localStorage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### ApiClient
+HTTP клиент для работы с API:
+- Автоматическое добавление заголовков авторизации
+- Retry логика с экспоненциальной задержкой
+- Обработка различных форматов ответов
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Validation
+Схемы валидации с использованием Zod:
+- Валидация номеров телефонов
+- Проверка SMS кодов
+- Валидация форм записи
+
+## Поток данных
+
+### Авторизация
+1. Пользователь вводит номер телефона
+2. `AuthService.sendSms()` отправляет запрос на API
+3. SMS код отправляется пользователю
+4. Пользователь вводит SMS код
+5. `AuthService.loginWithSms()` выполняет вход
+6. Токен сохраняется в `StorageService`
+7. Состояние обновляется в `AuthContext`
+8. Происходит перенаправление на страницу записей
+
+### Загрузка данных
+1. Хуки (`useCategories`, `useBusinesses`) вызываются в компонентах
+2. Данные загружаются через `ApiClient`
+3. Результаты сохраняются в состоянии хуков
+4. Компоненты перерендериваются с новыми данными
+
+## Безопасность
+
+### Аутентификация
+- JWT токены для авторизации
+- Автоматическое добавление заголовка `Authorization`
+- Проверка валидности токенов
+
+### Валидация
+- Валидация на клиенте с помощью Zod
+- Проверка форматов данных
+- Санитизация пользовательского ввода
+
+## Производительность
+
+### Оптимизация
+- Ленивая загрузка компонентов
+- Мемоизация с помощью `useCallback` и `useMemo`
+- Оптимизация перерендеров
+
+### Кэширование
+- Кэширование данных в localStorage
+- Сохранение состояния развернутых категорий
+- Кэширование дочерних категорий
+
+## Развертывание
+
+### Требования
+- Node.js 18+
+- npm или yarn
+
+### Установка
+```bash
+npm install
+```
+
+### Разработка
+```bash
+npm run dev
+```
+
+### Сборка
+```bash
+npm run build
+```
+
+### Продакшн
+```bash
+npm start
+```
+
+## API интеграция
+
+### Endpoints
+- `/proxy/categories` - получение категорий
+- `/proxy/businesses` - получение списка клиник
+- `/proxy/send-sms` - отправка SMS
+- `/proxy/registration` - регистрация/вход
+- `/proxy/save-schedule` - сохранение записи
+
+### Аутентификация
+- API ключ в заголовке `api-key`
+- Bearer токен в заголовке `Authorization`
+
+## Мониторинг и логирование
+
+### Логирование
+- Логирование ошибок в консоль
+- Возможность интеграции с внешними сервисами
+- Детальная информация об ошибках в development режиме
+
+### Error Boundaries
+- Перехват ошибок React компонентов
+- Graceful fallback UI
+- Информация об ошибках для разработчиков
+
+## Будущие улучшения
+
+### Планируемые функции
+- PWA поддержка
+- Офлайн режим
+- Push уведомления
+- Аналитика и метрики
+- Многоязычность
+
+### Технические улучшения
+- Unit и интеграционные тесты
+- E2E тестирование
+- CI/CD pipeline
+- Мониторинг производительности
+- A/B тестирование
+
+## Поддержка
+
+Для вопросов и предложений обращайтесь к команде разработки.
+
+---
+
+**Версия:** 1.0.0  
+**Последнее обновление:** 2024
